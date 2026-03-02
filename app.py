@@ -2,8 +2,6 @@ from fastapi import FastAPI, HTTPException, Header
 from fastapi.responses import HTMLResponse
 from fastapi.middleware.cors import CORSMiddleware
 import os
-import datetime
-import random
 
 app = FastAPI(title="Mission Control")
 
@@ -15,7 +13,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Dashboard HTML
 DASHBOARD_HTML = """
 <!DOCTYPE html>
 <html lang="en">
@@ -154,28 +151,12 @@ DASHBOARD_HTML = """
         }
         
         function renderAgents(agents) {
-            const html = agents.map(a => `
-                <div class="agent-card">
-                    <div class="agent-header">
-                        <span class="agent-name">${a.name}</span>
-                        <span class="agent-status ${a.status}">${a.status}</span>
-                    </div>
-                    <div style="color: #666; font-size: 0.85rem;">
-                        <div>Tasks: ${a.tasks}</div>
-                        <div>Cost: ${a.cost}</div>
-                    </div>
-                </div>
-            `).join('');
+            const html = agents.map(a => '<div class="agent-card"><div class="agent-header"><span class="agent-name">'+a.name+'</span><span class="agent-status '+a.status+'">'+a.status+'</span></div><div style="color: #666; font-size: 0.85rem;"><div>Tasks: '+a.tasks+'</div><div>Cost: '+a.cost+'</div></div></div>').join('');
             document.getElementById('agents-list').innerHTML = html || '<p style="color:#666">No active agents</p>';
         }
         
         function renderActivity(activity) {
-            const html = activity.map(a => `
-                <div class="activity-item">
-                    <span class="activity-time">${a.time}</span>
-                    <span class="activity-text">${a.message}</span>
-                </div>
-            `).join('');
+            const html = activity.map(a => '<div class="activity-item"><span class="activity-time">'+a.time+'</span><span class="activity-text">'+a.message+'</span></div>').join('');
             document.getElementById('activity-list').innerHTML = html || '<p style="color:#666">No recent activity</p>';
         }
         
@@ -198,7 +179,6 @@ DASHBOARD_HTML = """
 </html>
 """
 
-# Mock data for demo
 MOCK_AGENTS = [
     {"name": "scout-01", "status": "online", "tasks": 234, "cost": "$3.21"},
     {"name": "worker-alpha", "status": "busy", "tasks": 89, "cost": "$4.56"},
@@ -212,7 +192,7 @@ MOCK_ACTIVITY = [
     {"time": "2m ago", "message": "Task completed: data_collection_2024"},
     {"time": "5m ago", "message": "Agent scout-01 started"},
     {"time": "8m ago", "message": "Cost threshold alert cleared"},
-    {"time": "12m", "12 "ago", "message": "New task assigned to worker-alpha"},
+    {"time": "12m ago", "message": "New task assigned to worker-alpha"},
     {"time": "15m ago", "message": "Database connection established"},
     {"time": "18m ago", "message": "Health check passed"}
 ]
@@ -250,18 +230,8 @@ async def get_stats(authorization: str = Header(None)):
     try:
         verify_token(authorization)
     except:
-        return {
-            "active_agents": 12,
-            "tasks_today": 847,
-            "cost_today": "$12.45",
-            "uptime": "99.9%"
-        }
-    return {
-        "active_agents": 12,
-        "tasks_today": 847,
-        "cost_today": "$12.45",
-        "uptime": "99.9%"
-    }
+        return {"active_agents": 12, "tasks_today": 847, "cost_today": "$12.45", "uptime": "99.9%"}
+    return {"active_agents": 12, "tasks_today": 847, "cost_today": "$12.45", "uptime": "99.9%"}
 
 @app.get("/health")
 async def health():
