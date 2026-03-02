@@ -13,8 +13,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-DASHBOARD_HTML = """
-<!DOCTYPE html>
+DASHBOARD_HTML = '''<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -22,7 +21,7 @@ DASHBOARD_HTML = """
     <title>OpenClaw Mission Control</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Segoe UI', system-ui, sans-serif; background: #0a0a0f; color: #e0e0e0; min-height: 100vh; }
+        body { font-family: "Segoe UI", system-ui, sans-serif; background: #0a0a0f; color: #e0e0e0; min-height: 100vh; }
         .container { max-width: 1400px; margin: 0 auto; padding: 20px; }
         header { display: flex; justify-content: space-between; align-items: center; padding: 20px 0; border-bottom: 1px solid #1e1e2e; margin-bottom: 30px; }
         h1 { font-size: 1.8rem; background: linear-gradient(90deg, #00d4ff, #7c3aed); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
@@ -60,14 +59,14 @@ DASHBOARD_HTML = """
 <body>
     <div id="login-screen" class="login-screen">
         <div class="login-box">
-            <h2>🔐 Mission Control</h2>
+            <h2>Mission Control</h2>
             <input type="password" id="token-input" placeholder="Enter your auth token">
             <button onclick="login()">Access Dashboard</button>
         </div>
     </div>
     <div id="dashboard" class="container hidden">
         <header>
-            <h1>🚀 OpenClaw Mission Control</h1>
+            <h1>OpenClaw Mission Control</h1>
             <div>
                 <span style="color: #666;">Welcome, Admin</span>
                 <button onclick="logout()" style="margin-left: 15px; padding: 8px 16px; background: #1e1e2e; border: none; border-radius: 6px; color: #fff; cursor: pointer;">Logout</button>
@@ -92,92 +91,73 @@ DASHBOARD_HTML = """
             </div>
         </div>
         <div class="section">
-            <h2>🤖 Active Agents</h2>
+            <h2>Active Agents</h2>
             <div class="agents-grid" id="agents-list"></div>
         </div>
         <div class="section">
-            <h2>📡 Live Activity</h2>
+            <h2>Live Activity</h2>
             <div class="activity-list" id="activity-list"></div>
         </div>
     </div>
     <script>
-        const TOKEN = localStorage.getItem('mc_token') || '';
-        
+        const TOKEN = localStorage.getItem("mc_token") || "";
         function login() {
-            const input = document.getElementById('token-input').value;
-            if(input) {
-                localStorage.setItem('mc_token', input);
-                location.reload();
-            }
+            const input = document.getElementById("token-input").value;
+            if(input) { localStorage.setItem("mc_token", input); location.reload(); }
         }
-        
-        function logout() {
-            localStorage.removeItem('mc_token');
-            location.reload();
-        }
-        
+        function logout() { localStorage.removeItem("mc_token"); location.reload(); }
         if(TOKEN) {
-            document.getElementById('login-screen').classList.add('hidden');
-            document.getElementById('dashboard').classList.remove('hidden');
+            document.getElementById("login-screen").classList.add("hidden");
+            document.getElementById("dashboard").classList.remove("hidden");
             loadData();
             setInterval(loadData, 5000);
         }
-        
         async function loadData() {
             try {
-                const headers = { 'Authorization': 'Bearer ' + TOKEN };
+                const headers = { "Authorization": "Bearer " + TOKEN };
                 const [agentsRes, activityRes, statsRes] = await Promise.all([
-                    fetch('/api/agents', { headers }),
-                    fetch('/api/activity', { headers }),
-                    fetch('/api/stats', { headers })
+                    fetch("/api/agents", { headers }),
+                    fetch("/api/activity", { headers }),
+                    fetch("/api/stats", { headers })
                 ]);
-                
-                if(agentsRes.ok) {
-                    const agents = await agentsRes.json();
-                    renderAgents(agents);
-                }
-                if(activityRes.ok) {
-                    const activity = await activityRes.json();
-                    renderActivity(activity);
-                }
+                if(agentsRes.ok) renderAgents(await agentsRes.json());
+                if(activityRes.ok) renderActivity(await activityRes.json());
                 if(statsRes.ok) {
-                    const stats = await statsRes.json();
-                    document.getElementById('active-agents').textContent = stats.active_agents;
-                    document.getElementById('tasks-today').textContent = stats.tasks_today;
-                    document.getElementById('cost-today').textContent = stats.cost_today;
-                    document.getElementById('uptime').textContent = stats.uptime;
+                    const s = await statsRes.json();
+                    document.getElementById("active-agents").textContent = s.active_agents;
+                    document.getElementById("tasks-today").textContent = s.tasks_today;
+                    document.getElementById("cost-today").textContent = s.cost_today;
+                    document.getElementById("uptime").textContent = s.uptime;
                 }
-            } catch(e) { console.log('Using mock data'); renderMockData(); }
+            } catch(e) { renderMockData(); }
         }
-        
         function renderAgents(agents) {
-            const html = agents.map(a => '<div class="agent-card"><div class="agent-header"><span class="agent-name">'+a.name+'</span><span class="agent-status '+a.status+'">'+a.status+'</span></div><div style="color: #666; font-size: 0.85rem;"><div>Tasks: '+a.tasks+'</div><div>Cost: '+a.cost+'</div></div></div>').join('');
-            document.getElementById('agents-list').innerHTML = html || '<p style="color:#666">No active agents</p>';
+            document.getElementById("agents-list").innerHTML = agents.map(a =>
+                "<div class=agent-card><div class=agent-header><span class=agent-name>"+a.name+"</span><span class=agent-status "+a.status+">"+a.status+"</span></div><div style=color:#666;font-size:0.85rem><div>Tasks: "+a.tasks+"</div><div>Cost: "+a.cost+"</div></div></div>"
+            ).join("") || "<p style=color:#666>No active agents</p>";
         }
-        
         function renderActivity(activity) {
-            const html = activity.map(a => '<div class="activity-item"><span class="activity-time">'+a.time+'</span><span class="activity-text">'+a.message+'</span></div>').join('');
-            document.getElementById('activity-list').innerHTML = html || '<p style="color:#666">No recent activity</p>';
+            document.getElementById("activity-list").innerHTML = activity.map(a =>
+                "<div class=activity-item><span class=activity-time>"+a.time+"</span><span class=activity-text>"+a.message+"</span></div>"
+            ).join("") || "<p style=color:#666>No recent activity</p>";
         }
-        
         function renderMockData() {
             renderAgents([
-                { name: 'scout-01', status: 'online', tasks: 234, cost: '$3.21' },
-                { name: 'worker-alpha', status: 'busy', tasks: 89, cost: '$4.56' },
-                { name: 'data-collector', status: 'online', tasks: 156, cost: '$2.34' },
-                { name: 'monitor-bot', status: 'online', tasks: 45, cost: '$0.89' }
+                { name: "scout-01", status: "online", tasks: 234, cost: "$3.21" },
+                { name: "worker-alpha", status: "busy", tasks: 89, cost: "$4.56" },
+                { name: "data-collector", status: "online", tasks: 156, cost: "$2.34" },
+                { name: "monitor-bot", status: "online", tasks: 45, cost: "$0.89" }
             ]);
             renderActivity([
-                { time: '2m ago', message: 'Task completed: data_collection_2024' },
-                { time: '5m ago', message: 'Agent scout-01 started' },
-                { time: '8m ago', message: 'Cost threshold alert cleared' },
-                { time: '12m ago', message: 'New task assigned to worker-alpha' }
+                { time: "2m ago", message: "Task completed: data_collection_2024" },
+                { time: "5m ago", message: "Agent scout-01 started" },
+                { time: "8m ago", message: "Cost threshold alert cleared" },
+                { time: "12m ago", message: "New task assigned to worker-alpha" }
             ]);
         }
     </script>
 </body>
-</html>
-"""
+</html>'''
 
 MOCK_AGENTS = [
     {"name": "scout-01", "status": "online", "tasks": 234, "cost": "$3.21"},
